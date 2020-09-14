@@ -4,17 +4,17 @@ import processing.core.PApplet._
 import processing.core.PConstants._
 import processing.core._
 
-class Main extends PApplet {
-  
-  override def setup {
+class BasicExample extends PApplet {
+
+  override def setup() {
     size(800, 800)
     colorMode(HSB, 100)
     frameRate(999)
     background(0)
-    noLoop
+    noLoop()
   }
 
-  override def draw {
+  override def draw() {
     def pix(f:(Int, Int) => Unit) {
       for (x <- 0 until width; y <- 0 until height) f(x, y)
     }
@@ -25,8 +25,8 @@ class Main extends PApplet {
   }
 }
 
-object Main {
+object BasicExample {
   def main(args:Array[String]) {
-    PApplet.main(Array("kuhn.Main"))
+    PApplet.main(Array("scalaprocessing.BasicExample"))
   }
 }
