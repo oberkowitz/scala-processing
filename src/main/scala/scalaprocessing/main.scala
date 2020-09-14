@@ -1,8 +1,8 @@
-package kuhn
+package scalaprocessing
 
+import processing.core.PApplet._
+import processing.core.PConstants._
 import processing.core._
-import PConstants._
-import PApplet._
 
 class Main extends PApplet {
   
