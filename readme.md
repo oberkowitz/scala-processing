@@ -3,10 +3,13 @@
 This is a template project for developing [Processing](http://processing.org) programs in Scala. Includes:
 
 * Processing core library and source
-* SBT project and IDEA project
+* SBT project and IDEA project template
 
-Everything needed to get up and running with Processing and Scala quickly! To automatically compile and run after each code change:
+Rename `.ideatemplate` to `.idea` and open the project with IntelliJ, or simply open the `build.sbt` in the IntelliJ 
+window and go through the dialogs.
 
-    sbt ~run
+If you don't use the default template, make sure to add all the jars in `lib/` as modules.
 
-The next compile/run cycle will automatically start when the previous process ends and the you save a code change.
+### JDK issues
+* Processing more or less requires Java 8, but later sbt versions default to 10
+* Configuring the IntelliJ project to use 1.8 is easier than changing the `JAVA_HOME` just for this project

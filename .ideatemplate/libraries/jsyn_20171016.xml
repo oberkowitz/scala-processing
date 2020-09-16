@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="jsyn-20171016">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/jsyn-20171016.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/themidibus.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/sound.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
