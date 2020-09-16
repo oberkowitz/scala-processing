@@ -6,8 +6,11 @@ import processing.core._
 
 class BasicExample extends PApplet {
 
-  override def setup() {
+  override def settings() {
     size(800, 800)
+  }
+
+  override def setup() {
     colorMode(HSB, 100)
     frameRate(999)
     background(0)

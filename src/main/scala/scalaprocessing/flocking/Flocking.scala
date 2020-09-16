@@ -2,13 +2,16 @@ package scalaprocessing.flocking
 
 import processing.core.{PApplet, PConstants}
 
+// Ported from Dan Shiffman's example built into Processing
 class Flocking extends PApplet {
   val flock = new Flock
 
-  override def setup() {
+  override def settings(): Unit = {
     size(640, 360)
+  }
+  override def setup() {
     // Add an initial set of boids into the system
-    (0 to 150).foreach { i =>
+    (0 to 2).foreach { i =>
       flock.addBoid(new Boid(width / 2, height / 2))
     }
   }
