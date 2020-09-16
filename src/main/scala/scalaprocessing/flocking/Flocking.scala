@@ -11,7 +11,7 @@ class Flocking extends PApplet {
   }
   override def setup() {
     // Add an initial set of boids into the system
-    (0 to 2).foreach { i =>
+    (0 to 150).foreach { i =>
       flock.addBoid(new Boid(width / 2, height / 2))
     }
   }
@@ -51,7 +51,7 @@ class Flocking extends PApplet {
 
 }
 
-object Main {
+object Flocking {
   def main(args: Array[String]) {
     PApplet.main(Array("scalaprocessing.flocking.Flocking"))
   }
