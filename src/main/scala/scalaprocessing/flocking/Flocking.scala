@@ -26,7 +26,7 @@ class Flocking extends PApplet {
   }
 
   def renderBoid(boid: Boid): Unit = { // Draw a triangle rotated in the direction of velocity
-    val theta = boid.velocity.heading2D + PApplet.radians(90)
+    val theta = boid.velocity.heading + PApplet.radians(90)
     // heading2D() above is now heading() but leaving old syntax until Processing.js catches up
     fill(200, 100)
     stroke(255)
