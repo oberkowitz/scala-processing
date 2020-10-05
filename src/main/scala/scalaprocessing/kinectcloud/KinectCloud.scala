@@ -68,7 +68,7 @@ class KinectCloud extends PApplet {
   override def draw(): Unit = {
     val rawDepth = kinect2.getRawDepth
     val newDepth = rawDepth.map {
-      case i if i <= backWall && i >= frontWall => constrain(map(i, 0, 4500, 0, 1.0f), 0, 1.0f)
+      case i if i <= backWall && i >= frontWall => 1.0f//constrain(map(i, 0, 4500, 0, 1.0f), 0, 1.0f)
       case _ => 0
     }
 
