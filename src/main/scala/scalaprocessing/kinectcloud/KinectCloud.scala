@@ -15,8 +15,8 @@ class KinectCloud extends PApplet {
 
   val kinect2 = new Kinect2(this)
 
-  var frontWall = 0
-  var backWall = Int.MaxValue
+  var frontWall = 100
+  var backWall = 3000
 
   override def settings(): Unit = {
     size(kinect2.depthWidth, kinect2.depthHeight)
