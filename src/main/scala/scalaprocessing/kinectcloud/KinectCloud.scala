@@ -72,8 +72,6 @@ class KinectCloud extends PApplet {
       case _ => 0
     }
 
-
-
     var dx = 0.0
     var dy = 0.0
     val now = millis
@@ -81,7 +79,7 @@ class KinectCloud extends PApplet {
     val angle = PApplet.sin(now * 0.001f)
     val z = now * 0.00008
     val hue = now * 0.01
-    val scale = 0.002f
+    val scale = 0.001f
     dx = dx + PApplet.cos(angle) * speed
     dy = dx + PApplet.sin(angle) * speed
     loadPixels()
@@ -93,7 +91,7 @@ class KinectCloud extends PApplet {
       while ( {
         y < height
       }) {
-        val alpha = newDepth(x + width * y)
+        val alpha = if (scope) newDepth(x + width * y) else 1.0f
         val c = if (alpha != 0) {
 
           val ddx = dx + x * scale
@@ -103,7 +101,7 @@ class KinectCloud extends PApplet {
           val dd: Float = ((hue + 80.0 * m) % 100.0).toFloat
           val fl: Float = 100 - 100 * constrain(PApplet.pow((3.0f * n).toFloat, 3.5f), 0, 0.9f)
           val asdf: Float = 100 * constrain(PApplet.pow((3.0 * n).toFloat, 1.5f), 0, 0.9f)
-          color(dd, asdf, asdf * (if (scope) alpha else 1.0f) )
+          color(dd, asdf, asdf * alpha )
         } else {
           color(0)
         }
