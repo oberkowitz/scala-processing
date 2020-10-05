@@ -1,4 +1,4 @@
-package scalaprocessing.playground.util
+package scalaprocessing.util
 
 import processing.core.PVector
 

@@ -1,18 +1,19 @@
 package scalaprocessing.playground
 
 import processing.core.{PApplet, PConstants, PVector}
-import scalaprocessing.playground.util.util._
+import scalaprocessing.util.util._
 
 abstract class Vehicle[Context] {
-  def location: PVector
-  def velocity: PVector
-  def acceleration: PVector // Not necessary?
+
+  type Action = Context => PVector
+
+  val location: PVector
+  val velocity: PVector
 
   val maximumSpeed: Float
   val maximumForce: Float
 
   def render(pa: PApplet): Unit
-
   def desiredVelocity(context: Context): PVector
 
   def steeringForce(context: Context): PVector = {
@@ -20,7 +21,6 @@ abstract class Vehicle[Context] {
     val steer = (desired.normalized * maximumSpeed) - velocity
     steer.lim(maximumForce)
   }
-
 }
 
 object SeekingVehicle {
@@ -31,20 +31,16 @@ object SeekingVehicle {
   }
 }
 
-case class Seeker(location: PVector, velocity: PVector)
-
 class SeekingVehicle(val location: PVector, val velocity: PVector) extends Vehicle[PApplet] {
-  val r = 3f
+  val r = 5f
 
   var acc = new PVector(0, 0)
-
-  override def acceleration = acc
 
   override val maximumSpeed = 4f
   override val maximumForce = .1f
 
   //  override def render(pa: PApplet): Unit = ???
-  override def desiredVelocity(pApplet: PApplet) = {
+  override def desiredVelocity(pApplet: PApplet): PVector = {
     val target = new PVector(pApplet.mouseX, pApplet.mouseY)
 
     target - location
