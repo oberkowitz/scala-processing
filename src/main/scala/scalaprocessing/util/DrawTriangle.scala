@@ -6,7 +6,7 @@ object DrawTriangle {
 
   def draw(location: PVector, velocity: PVector, pApplet: PApplet, radius: Float): Unit = {
     val theta = velocity.heading + PApplet.radians(90)
-    pApplet.fill(200, 200)
+    pApplet.fill(200, 255)
     pApplet.stroke(255)
     pApplet.pushMatrix()
     pApplet.translate(location.x, location.y)

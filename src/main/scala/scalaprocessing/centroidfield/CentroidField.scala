@@ -23,7 +23,7 @@ class CentroidField extends PApplet {
         new PVector(random(width), random(height))))
 
   override def settings(): Unit = {
-    size(512 * 3, 424)
+    size(512, 424)
   }
 
   override def setup(): Unit = {
@@ -31,12 +31,12 @@ class CentroidField extends PApplet {
     kinect2.initDevice()
     opencv.gray()
     opencv.threshold(70)
-    val blank = createImage(512 * 3, 424, PConstants.RGB)
+    val blank = createImage(512, 424, PConstants.RGB)
     image(blank, 0, 0)
 
     flowField.init()
 
-    frameRate(40)
+//    frameRate(40)
   }
   override def mouseClicked(): Unit = {
     flowField.init()
@@ -61,7 +61,7 @@ class CentroidField extends PApplet {
     background(0)
     val depthData = kinect2.getRawDepth()
     val processedDepthData = depthData.map {
-      case i if i <= backWall && i >= frontWall => color(255)
+      case i if i <= backWall && i >= frontWall => color(random(255), random(255), random(255))
       case _ => 0
     }
     val depthImg = new PImage(kinect2.depthWidth, kinect2.depthHeight)
@@ -71,24 +71,24 @@ class CentroidField extends PApplet {
     depthImg.updatePixels()
 
     opencv.loadImage(depthImg)
-    val displayOut = opencv.getOutput()
+//    val displayOut = opencv.getOutput()
 
     val contours = opencv.findContours().asScala.toSeq.filter(_.numPoints() > 200).map(new ProjectionContour(_, 512, 424))
     image(depthImg, 0, 0)
-    image(displayOut, depthImg.width, 0)
+//    image(displayOut, depthImg.width, 0)
 
     noFill()
     strokeWeight(3)
 
-    contours.foreach(drawContour)
+//    contours.foreach(drawContour)
 
     // Flow field drawing
     pushMatrix()
-    translate(512 * 2, 0)
+//    translate(512 * 2, 0)
     strokeWeight(1)
     val modifiedField = new FlowField(16, 512, 424, this)
     if (frameCount % 5 == 1) {
-      flowField.mutate(.008f)
+      flowField.mutate(.01f)
       modifiedField.copyField(flowField.field)
       modify2(modifiedField, contours, processedDepthData, 512)
       cachedField = modifiedField
@@ -126,7 +126,7 @@ class CentroidField extends PApplet {
   }
 
 
-  def modify2(flowField: FlowField, projectionContours: Seq[ProjectionContour], processedDepthData: Array[Int], width: Int) = {
+  def modify2(flowField: FlowField, projectionContours: Seq[ProjectionContour], processedDepthData: Array[Int], width: Int): Unit = {
     flowField.field.zipWithIndex.foreach {
       case (column, i) =>
         column.zipWithIndex.foreach {
