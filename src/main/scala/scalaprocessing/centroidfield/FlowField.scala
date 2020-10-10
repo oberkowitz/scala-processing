@@ -21,7 +21,13 @@ class FlowField(val resolution: Int, val width: Int, val height: Int, pa: PApple
   }
 
   def copyField(f: Array[Array[PVector]]): Unit = {
-    forEach((i, j, cell) => field(i)(j) = cell)
+    f.zipWithIndex.foreach {
+      case (column, i) =>
+        column.zipWithIndex.foreach {
+          case (cell, j) =>
+            field(i)(j) = cell
+        }
+    }
   }
 
   def init(): Unit = {
@@ -35,7 +41,7 @@ class FlowField(val resolution: Int, val width: Int, val height: Int, pa: PApple
     }
   }
 
-  def mutate(): Unit = {
+  def mutate(factor: Float = .001f): Unit = {
     pa.noiseSeed(pa.random(10000).toLong)
     (0 until cols).foreach { x =>
       (0 until rows).foreach { y =>

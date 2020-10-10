@@ -63,7 +63,7 @@ class FlowFieldTest extends PApplet {
   override def draw(): Unit = {
     background(0)
     flowField.mutate()
-    val modifiedField = new FlowField(15, 512, 424, this)
+    val modifiedField = new FlowField(8, 512, 424, this)
     createModifiedFlowField(new PVector(mouseX, mouseY), flowField, modifiedField)
     if (drawField) modifiedField.draw()
     val vs = vehicles.map { v =>

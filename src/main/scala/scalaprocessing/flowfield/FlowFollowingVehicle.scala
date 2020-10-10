@@ -6,7 +6,7 @@ import scalaprocessing.centroidfield.FlowField
 import scalaprocessing.util.util._
 
 class FlowFollowingVehicle(val location: PVector, val velocity: PVector) extends TriangularVehicle[FlowField](5) {
-  override val maximumSpeed = (Math.random().toFloat * 4) + 2
+  override val maximumSpeed = (Math.random().toFloat * 5) + 2
   override val maximumForce = (Math.random().toFloat / 2f) + .1f
 
   override def desiredVelocity(context: FlowField) = {

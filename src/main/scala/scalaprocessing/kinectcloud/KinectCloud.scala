@@ -14,9 +14,10 @@ object KinectCloud {
 class KinectCloud extends PApplet {
 
   val kinect2 = new Kinect2(this)
-
+  val noiseScale = 0.02
   var frontWall = 100
   var backWall = 3000
+  var scope = false
 
   override def settings(): Unit = {
     size(kinect2.depthWidth, kinect2.depthHeight)
@@ -34,31 +35,11 @@ class KinectCloud extends PApplet {
     println("BackWall: " + backWall)
   }
 
-  val noiseScale = 0.02
-  var scope = false
-
   override def setup(): Unit = {
     kinect2.initDepth()
     kinect2.initDevice()
     // Connect to the local instance of fcserver. You can change this line to connect to another computer's fcserver
     colorMode(PConstants.HSB, 100)
-  }
-
-  def fractalNoise(x: Double, y: Double, z: Double) = {
-
-    var xx = x
-    var yy = y
-    var zz = z
-    var r = 0.0
-    var amp = 1.0
-    (0 to 4).foreach { _ =>
-      r = r + noise(x.toFloat, y.toFloat, z.toFloat) * amp
-      amp /= 2
-      xx *= 2
-      yy *= 2
-      zz *= 2
-    }
-    r
   }
 
   override def mouseClicked(): Unit = {
@@ -68,7 +49,8 @@ class KinectCloud extends PApplet {
   override def draw(): Unit = {
     val rawDepth = kinect2.getRawDepth
     val newDepth = rawDepth.map {
-      case i if i <= backWall && i >= frontWall => 1.0f//constrain(map(i, 0, 4500, 0, 1.0f), 0, 1.0f)
+      case _ if !scope => 1.0f
+      case i if i <= backWall && i >= frontWall => 1.0f //constrain(map(i, 0, 4500, 0, 1.0f), 0, 1.0f)
       case _ => 0
     }
 
@@ -91,7 +73,7 @@ class KinectCloud extends PApplet {
       while ( {
         y < height
       }) {
-        val alpha = if (scope) newDepth(x + width * y) else 1.0f
+        val alpha = newDepth(x + width * y)
         val c = if (alpha != 0) {
 
           val ddx = dx + x * scale
@@ -101,22 +83,41 @@ class KinectCloud extends PApplet {
           val dd: Float = ((hue + 80.0 * m) % 100.0).toFloat
           val fl: Float = 100 - 100 * constrain(PApplet.pow((3.0f * n).toFloat, 3.5f), 0, 0.9f)
           val asdf: Float = 100 * constrain(PApplet.pow((3.0 * n).toFloat, 1.5f), 0, 0.9f)
-          color(dd, asdf, asdf * alpha )
+          color(dd, asdf, asdf * alpha)
         } else {
           color(0)
         }
         pixels(x + width * y) = c
 
         {
-          y += 1; y - 1
+          y += 1
+          y - 1
         }
       }
 
       {
-        x += 1; x - 1
+        x += 1
+        x - 1
       }
     }
     updatePixels()
+  }
+
+  def fractalNoise(x: Double, y: Double, z: Double) = {
+
+    var xx = x
+    var yy = y
+    var zz = z
+    var r = 0.0
+    var amp = 1.0
+    (0 to 4).foreach { _ =>
+      r = r + noise(x.toFloat, y.toFloat, z.toFloat) * amp
+      amp /= 2
+      xx *= 2
+      yy *= 2
+      zz *= 2
+    }
+    r
   }
 
 }

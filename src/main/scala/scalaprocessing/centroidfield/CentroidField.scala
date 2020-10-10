@@ -2,7 +2,6 @@ package scalaprocessing.centroidfield
 
 import gab.opencv._
 import org.openkinect.processing.Kinect2
-import processing.core.PApplet.{constrain, map}
 import processing.core.{PApplet, PConstants, PImage, PVector}
 import scalaprocessing.flowfield.FlowFollowingVehicle
 import scalaprocessing.util.util._
@@ -16,8 +15,9 @@ class CentroidField extends PApplet {
   var backWall = 3000
 
   val flowField = new FlowField(16, 512, 424, this)
+  var cachedField = new FlowField(16, 512, 424, this)
   var drawField = true
-  var vehicles: Seq[FlowFollowingVehicle] = (1 to 20).map(
+  var vehicles: Seq[FlowFollowingVehicle] = (1 to 50).map(
     _ =>
       new FlowFollowingVehicle(new PVector(random(512), random(424)),
         new PVector(random(width), random(height))))
@@ -35,6 +35,11 @@ class CentroidField extends PApplet {
     image(blank, 0, 0)
 
     flowField.init()
+
+    frameRate(40)
+  }
+  override def mouseClicked(): Unit = {
+    flowField.init()
   }
 
   override def keyPressed(): Unit = {
@@ -44,6 +49,9 @@ class CentroidField extends PApplet {
       case PConstants.LEFT => backWall = Math.max(backWall - 5, 0)
       case PConstants.RIGHT => backWall = Math.min(backWall + 5, 4500)
       case _ => ()
+    }
+    if (key == ' ') {
+      drawField = !drawField
     }
     println("FrontWall: " + frontWall)
     println("BackWall: " + backWall)
@@ -65,44 +73,28 @@ class CentroidField extends PApplet {
     opencv.loadImage(depthImg)
     val displayOut = opencv.getOutput()
 
-    val contours: Seq[Contour] = opencv.findContours().asScala.toSeq.filter(_.numPoints() > 100)
+    val contours = opencv.findContours().asScala.toSeq.filter(_.numPoints() > 200).map(new ProjectionContour(_, 512, 424))
     image(depthImg, 0, 0)
     image(displayOut, depthImg.width, 0)
 
     noFill()
     strokeWeight(3)
 
-    for (contour <- contours) {
-
-      stroke(0, 255, 0)
-      contour.draw()
-      stroke(255, 0, 0)
-      beginShape()
-      for (point <- contour.getPolygonApproximation.getPoints.asScala) {
-        vertex(point.x, point.y)
-      }
-      endShape()
-      beginShape()
-      stroke(0, 0, 255)
-      fill(color(0, 0, 255))
-      val projectionContour = new ProjectionContour(contour, 512, 424)
-      ellipse(projectionContour.center.x, projectionContour.center.y, 5, 5)
-      noFill()
-      endShape()
-    }
+    contours.foreach(drawContour)
 
     // Flow field drawing
     pushMatrix()
     translate(512 * 2, 0)
     strokeWeight(1)
     val modifiedField = new FlowField(16, 512, 424, this)
-    modifiedField.copyField(flowField.field)
-
-//    modify2(modifiedField, contours.map(new ProjectionContour(_, 512, 424)))
-    for (contour <- contours) {
-      val pc = new ProjectionContour(contour, 512, 424)
-      modifyFlowField(pc, modifiedField)
-
+    if (frameCount % 5 == 1) {
+      flowField.mutate(.008f)
+      modifiedField.copyField(flowField.field)
+      modify2(modifiedField, contours, processedDepthData, 512)
+      cachedField = modifiedField
+    } else {
+      cachedField.mutate(.008f)
+      modifiedField.copyField(cachedField.field)
     }
     if (drawField) modifiedField.draw()
     val vs = vehicles.map { v =>
@@ -115,19 +107,41 @@ class CentroidField extends PApplet {
 
   }
 
-  def modify2(flowField: FlowField, projectionContours: Seq[ProjectionContour]) = {
+  private def drawContour(pc: ProjectionContour): Unit = {
+    stroke(0, 255, 0)
+    pc.contour.draw()
+    stroke(255, 0, 0)
+    beginShape()
+    for (point <- pc.contour.getPolygonApproximation.getPoints.asScala) {
+      vertex(point.x, point.y)
+    }
+    endShape()
+    beginShape()
+    stroke(0, 0, 255)
+    fill(color(0, 0, 255))
+    val projectionContour = new ProjectionContour(pc.contour, 512, 424)
+    ellipse(projectionContour.center.x, projectionContour.center.y, 5, 5)
+    noFill()
+    endShape()
+  }
+
+
+  def modify2(flowField: FlowField, projectionContours: Seq[ProjectionContour], processedDepthData: Array[Int], width: Int) = {
     flowField.field.zipWithIndex.foreach {
       case (column, i) =>
         column.zipWithIndex.foreach {
           case (_, j) =>
             // find vector directly away from the centroid
             val cellLocation = new PVector(i * flowField.resolution, j * flowField.resolution)
-            val pcOpt = projectionContours.find(_.contour.containsPoint(cellLocation.x.toInt, cellLocation.y.toInt))
-            pcOpt.foreach { pc =>
-              val outwards = cellLocation - pc.center
-              val heading = outwards.heading()
-              val perf = new PVector(Math.cos(heading).toFloat, Math.sin(heading).toFloat)
-              flowField.field(i)(j) = perf.normalize()
+            val fl = cellLocation.x.toInt + width * cellLocation.y.toInt
+            if (processedDepthData(fl) !=  0) {
+              val pcOpt = projectionContours.find(_.contour.containsPoint(cellLocation.x.toInt, cellLocation.y.toInt))
+              pcOpt.foreach { pc =>
+                val outwards = cellLocation - pc.center
+                val heading = outwards.heading()
+                val perf = new PVector(Math.cos(heading).toFloat, Math.sin(heading).toFloat)
+                flowField.field(i)(j) = perf.normalize()
+              }
             }
         }
     }
