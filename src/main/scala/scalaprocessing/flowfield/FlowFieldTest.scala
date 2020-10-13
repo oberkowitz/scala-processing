@@ -68,7 +68,7 @@ class FlowFieldTest extends PApplet {
     if (drawField) modifiedField.draw()
     val vs = vehicles.map { v =>
       val vehicle = FlowFollowingVehicle.nextStep(v, modifiedField, 512, 424)
-      v.render(this)
+      v.render(this.getGraphics)
       vehicle
     }
     vehicles = vs

@@ -2,28 +2,36 @@ package scalaprocessing.centroidfield
 
 import gab.opencv._
 import org.openkinect.processing.Kinect2
-import processing.core.{PApplet, PConstants, PImage, PVector}
+import processing.core._
 import scalaprocessing.flowfield.FlowFollowingVehicle
 import scalaprocessing.util.util._
 
 import scala.jdk.CollectionConverters._
 
 class CentroidField extends PApplet {
-  val kinect2 = new Kinect2(this)
-  val opencv = new OpenCV(this, 512, 424)
-  var frontWall = 100
-  var backWall = 3000
 
-  val flowField = new FlowField(16, 512, 424, this)
-  var cachedField = new FlowField(16, 512, 424, this)
-  var drawField = true
-  var vehicles: Seq[FlowFollowingVehicle] = (1 to 50).map(
+  lazy val sWidth = 512
+  lazy val sHeight = 424
+  def pg(): PGraphics = getGraphics
+  val kinect2 = new Kinect2(this)
+  val opencv = new OpenCV(this, sWidth, sHeight)
+  var frontWall = 100
+  var backWall = 2000
+
+  val flowField = new FlowField(16, sWidth, sHeight, this)
+  var cachedField = new FlowField(16, sWidth, sHeight, this)
+  var drawField = false
+  var vehicles: Seq[FlowFollowingVehicle] = (1 to 100).map(
     _ =>
-      new FlowFollowingVehicle(new PVector(random(512), random(424)),
+      new FlowFollowingVehicle(new PVector(random(sWidth), random(sHeight)),
         new PVector(random(width), random(height))))
 
   override def settings(): Unit = {
-    size(512, 424)
+
+    fullScreen()
+//    size(sWidth, sHeight)
+//    pg = createGraphics(sWidth, sHeight)
+
   }
 
   override def setup(): Unit = {
@@ -31,7 +39,7 @@ class CentroidField extends PApplet {
     kinect2.initDevice()
     opencv.gray()
     opencv.threshold(70)
-    val blank = createImage(512, 424, PConstants.RGB)
+    val blank = createImage(sWidth, sHeight, PConstants.RGB)
     image(blank, 0, 0)
 
     flowField.init()
@@ -58,7 +66,12 @@ class CentroidField extends PApplet {
   }
 
   override def draw(): Unit = {
-    background(0)
+    if (frameCount % 1000 == 999) {
+      cachedField.init()
+      flowField.init()
+    }
+//    pg.scale(2)
+    pg.background(0)
     val depthData = kinect2.getRawDepth()
     val processedDepthData = depthData.map {
       case i if i <= backWall && i >= frontWall => color(random(255), random(255), random(255))
@@ -73,24 +86,24 @@ class CentroidField extends PApplet {
     opencv.loadImage(depthImg)
 //    val displayOut = opencv.getOutput()
 
-    val contours = opencv.findContours().asScala.toSeq.filter(_.numPoints() > 200).map(new ProjectionContour(_, 512, 424))
-    image(depthImg, 0, 0)
+    val contours = opencv.findContours().asScala.toSeq.filter(_.numPoints() > 200).map(new ProjectionContour(_, sWidth, sHeight))
+    pg.image(depthImg, 0, 0)
 //    image(displayOut, depthImg.width, 0)
 
-    noFill()
-    strokeWeight(3)
+    pg.noFill()
+    pg.strokeWeight(3)
 
 //    contours.foreach(drawContour)
 
     // Flow field drawing
-    pushMatrix()
-//    translate(512 * 2, 0)
-    strokeWeight(1)
-    val modifiedField = new FlowField(16, 512, 424, this)
+    pg.pushMatrix()
+//    translate(sDepth * 2, 0)
+    pg.strokeWeight(1)
+    val modifiedField = new FlowField(16, sWidth, sHeight, this)
     if (frameCount % 5 == 1) {
       flowField.mutate(.01f)
       modifiedField.copyField(flowField.field)
-      modify2(modifiedField, contours, processedDepthData, 512)
+      modify2(modifiedField, contours, processedDepthData, sWidth)
       cachedField = modifiedField
     } else {
       cachedField.mutate(.008f)
@@ -98,12 +111,12 @@ class CentroidField extends PApplet {
     }
     if (drawField) modifiedField.draw()
     val vs = vehicles.map { v =>
-      val vehicle = FlowFollowingVehicle.nextStep(v, modifiedField, 512, 424)
-      v.render(this)
+      val vehicle = FlowFollowingVehicle.nextStep(v, modifiedField, sWidth, sHeight)
+      v.render(pg)
       vehicle
     }
     vehicles = vs
-    popMatrix()
+    pg.popMatrix()
 
   }
 
@@ -119,7 +132,7 @@ class CentroidField extends PApplet {
     beginShape()
     stroke(0, 0, 255)
     fill(color(0, 0, 255))
-    val projectionContour = new ProjectionContour(pc.contour, 512, 424)
+    val projectionContour = new ProjectionContour(pc.contour, sWidth, sHeight)
     ellipse(projectionContour.center.x, projectionContour.center.y, 5, 5)
     noFill()
     endShape()

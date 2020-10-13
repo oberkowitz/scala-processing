@@ -12,7 +12,7 @@ class SeekingSketch extends PApplet {
   override def draw(): Unit = {
     background(0)
     vehicle = SeekingVehicle.nextStep(vehicle, this)
-    vehicle.render(this)
+    vehicle.render(this.getGraphics)
   }
 }
 

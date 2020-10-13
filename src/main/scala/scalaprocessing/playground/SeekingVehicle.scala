@@ -1,6 +1,6 @@
 package scalaprocessing.playground
 
-import processing.core.{PApplet, PConstants, PVector}
+import processing.core.{PApplet, PConstants, PGraphics, PVector}
 import scalaprocessing.agents.Vehicle
 import scalaprocessing.util.DrawTriangle
 import scalaprocessing.util.util._
@@ -29,8 +29,8 @@ class SeekingVehicle(val location: PVector, val velocity: PVector) extends Vehic
     target - location
   }
 
-  override def render(pa: PApplet): Unit = {
-    DrawTriangle.draw(location, velocity, pa, r)
+  override def render(pg: PGraphics): Unit = {
+    DrawTriangle.draw(location, velocity, pg, r)
   }
 
 }

@@ -4,6 +4,8 @@ import org.openkinect.processing.Kinect2
 import processing.core.PApplet.{constrain, map}
 import processing.core.{PApplet, PConstants, PVector}
 
+import scala.util.Try
+
 object KinectCloud {
 
   def main(args: Array[String]): Unit = {
@@ -16,10 +18,11 @@ class KinectCloud extends PApplet {
   val kinect2 = new Kinect2(this)
   val noiseScale = 0.02
   var frontWall = 100
-  var backWall = 3000
+  var backWall = 2000
   var scope = false
 
   override def settings(): Unit = {
+//    fullScreen()
     size(kinect2.depthWidth, kinect2.depthHeight)
   }
 
@@ -64,7 +67,7 @@ class KinectCloud extends PApplet {
     val scale = 0.001f
     dx = dx + PApplet.cos(angle) * speed
     dy = dx + PApplet.sin(angle) * speed
-    loadPixels()
+    getGraphics.loadPixels()
     var x = 0
     while ( {
       x < width
@@ -73,7 +76,7 @@ class KinectCloud extends PApplet {
       while ( {
         y < height
       }) {
-        val alpha = newDepth(x + width * y)
+        val alpha = Try(newDepth(x + kinect2.depthWidth * y)).toOption.getOrElse(0f)
         val c = if (alpha != 0) {
 
           val ddx = dx + x * scale
@@ -87,7 +90,7 @@ class KinectCloud extends PApplet {
         } else {
           color(0)
         }
-        pixels(x + width * y) = c
+        getGraphics.pixels(x + kinect2.depthWidth * y) = c
 
         {
           y += 1
@@ -100,7 +103,7 @@ class KinectCloud extends PApplet {
         x - 1
       }
     }
-    updatePixels()
+    getGraphics.updatePixels()
   }
 
   def fractalNoise(x: Double, y: Double, z: Double) = {

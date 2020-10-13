@@ -1,6 +1,6 @@
 package scalaprocessing.agents
 
-import processing.core.{PApplet, PConstants, PVector}
+import processing.core.{PApplet, PConstants, PGraphics, PVector}
 import scalaprocessing.util.DrawTriangle
 import scalaprocessing.util.util._
 
@@ -14,7 +14,8 @@ abstract class Vehicle[Context] {
   val maximumSpeed: Float
   val maximumForce: Float
 
-  def render(pa: PApplet): Unit
+  def render(pg: PGraphics): Unit
+
   def desiredVelocity(context: Context): PVector
 
   def steeringForce(context: Context): PVector = {
@@ -25,7 +26,7 @@ abstract class Vehicle[Context] {
 }
 
 abstract class TriangularVehicle[C](val r: Int) extends Vehicle[C] {
-  override def render(pa: PApplet): Unit = {
-    DrawTriangle.draw(location, velocity, pa, r)
+  override def render(pg: PGraphics): Unit = {
+    DrawTriangle.draw(location, velocity, pg, r)
   }
 }
